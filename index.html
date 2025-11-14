@@ -23,6 +23,14 @@
             color: #1f2937; /* Dark gray text */
             padding: 1rem;
         }
+        strong {
+            margin: 0 0.2em; /* Add small horizontal spacing */
+        }
+        .katex-inline-block {
+            display: inline-block; /* Ensure inline-block behavior */
+            margin-right: 0.5rem; /* Add spacing to the right */
+            vertical-align: middle; /* Align with surrounding text */
+        }
         main {
             max-width: 800px;
             margin: 0 auto;
@@ -286,23 +294,23 @@
                     The formula may look complex, but the idea is simple: it finds how well the template ($I$) matches a part of the new image ($J$), shifted by ($u, v$).
                 </p>
     
-                <div class="math-block text-center text-sm sm:text-lg p-6 bg-gray-100 rounded-lg">
+                <div class="math-block text-center text-sm sm:text-lg p-6 bg-gray-100 rounded-lg" id="katex-formula-main">
                     $$ C(u,v) = \frac{\sum_{x,y} [I(x, y) - \bar{I}] [J(x+u, y+v) - \bar{J}]}{\sqrt{\sum_{x,y} [I(x, y) - \bar{I}]^2 \sum_{x,y} [J(x+u, y+v) - \bar{J}]^2}} $$
                 </div>
                 
                 <p class="mt-6 mb-8">Where:</p>
                 <ul class="list-none space-y-4 m-0 p-0">
                     <li class="flex items-center mb-2">
-                        <span class="katex-inline-block" id="math-I"></span>: is the brightness of the pixel at position (x, y) in the <strong>Template (from Frame A)</strong>.
+                        <span class="katex-inline-block" id="math-I"></span>: is the brightness of the pixel at position (x, y) in the <strong> Template (from Frame A)</strong>.
                     </li>
                     <li class="flex items-center mb-2">
                         <span class="katex-inline-block" id="math-J"></span>: is the brightness of the pixel in <strong>Frame B</strong> that we are comparing against.
                     </li>
                     <li class="flex items-center mb-2">
-                        <span class="katex-inline-block" id="math-I-bar"></span>: is the <strong>average brightness</strong> of all pixels in the Template.
+                        <span class="katex-inline-block" id="math-I-bar"></span>: is the <strong> average brightness </strong> of all pixels in the Template.
                     </li>
                     <li class="flex items-center mb-2">
-                        <span class="katex-inline-block" id="math-J-bar"></span>: is the <strong>average brightness</strong> of all pixels in the current window of Frame B.
+                        <span class="katex-inline-block" id="math-J-bar"></span>: is the <strong> average brightness </strong> of all pixels in the current window of Frame B.
                     </li>
                 </ul>
                 <p class="mt-6">
@@ -388,6 +396,9 @@
             const ctxOverlay = canvasOverlay.getContext('2d');
             const canvasVector = document.getElementById('canvasVector');
             const ctxVector = canvasVector.getContext('2d');
+            const vectorSize = canvasVector.width; // Define vectorSize as the canvas width
+            const overlaySize = canvasOverlay.width;
+
             
             const canvasA_loss = document.getElementById('canvasA_loss');
             const ctxA_loss = canvasA_loss.getContext('2d');
@@ -676,6 +687,12 @@
             // --- 4. Render KaTeX Math Elements ---
             // This function finds the elements by ID and renders the LaTeX code inside them
             function renderMath() {
+                const mathIElement = document.getElementById('katex-formula-main');
+                if (mathIElement !== null && mathIElement.textContent !== null) {
+                    console.log(typeof mathIElement.textContent);
+                } else {
+                    console.log('Element with ID "math-I" not found or textContent is null.');
+                }
                 try {
                     if (window.katex) {
                         katex.render("C(u,v) = \\frac{\\sum_{x,y} [I(x, y) - \\bar{I}] [J(x+u, y+v) - \\bar{J}]}{\\sqrt{\\sum_{x,y} [I(x, y) - \\bar{I}]^2 \\sum_{x,y} [J(x+u, y+v) - \\bar{J}]^2}}", 
