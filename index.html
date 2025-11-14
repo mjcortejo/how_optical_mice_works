@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Optical Mice Work: A Simulation</title>
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Load 'Inter' font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 3. KaTeX (Math Rendering) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" xintegrity="sha384-GvrSgNYpXF0p+y6XhM/4k79/9cWj+rE3+0qB+V7f3A7sXg3Fj+hF/H+lq3sF/3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" xintegrity="sha384-H1C4jR4k4sE1B+x6b8fP0s+6b+K5O5c5y/5K/3+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/5+5+5/s0EjmrNCRD+/snq2/SfsPRbBDe8FqJdEBGQD0rhqE8Mwns8EIfB8+yvPTEeZJ2bNlQ/wEaP/lXN/Q==" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURPlLJSzFJU6eCiF+L/N2oHgyZMcNFGpDIfTwO1mEVLNEt9N/kkEOM" crossorigin="anonymous"></script>
+    
+    <!-- 4. Custom Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            color: #1f2937; /* Dark gray text */
+            padding: 1rem;
+        }
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h1, h2, h3 {
+            font-weight: 600;
+            margin-bottom: 0.5em;
+            color: #111827;
+        }
+        h1 { font-size: 2.25rem; line-height: 2.5rem; }
+        h2 { font-size: 1.5rem; line-height: 2rem; margin-top: 1.5em; }
+        h3 { font-size: 1.25rem; line-height: 1.75rem; margin-top: 1em; }
+        p, li {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        ul, ol {
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .control-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .visualization {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .canvas-container {
+            border: 1px solid #e5e7eb; /* gray-200 */
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: #f9fafb; /* gray-50 */
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1/1;
+            background-color: #e5e7eb; /* gray-200 */
+            border-radius: 4px;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            border: 1px solid #ccc;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+            border: none;
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: #1d4ed8; /* blue-700 */
+        }
+        .math-block {
+            background-color: #f9fafb; /* gray-50 */
+            border: 1px solid #e5e7eb; /* gray-200 */
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+            font-size: 1.125rem; /* text-lg */
+        }
+        code {
+            font-family: monospace;
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <main class="container mx-auto p-6">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">How Optical Mice Work</h1>
+            <p class="text-lg text-gray-600">An Interactive Demonstration</p>
+        </header>
+
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-3 text-gray-900">The Basic Idea</h2>
+            <p class="text-gray-700 leading-relaxed">
+                Ever wonder how your computer mouse knows where you're moving it? It's not magic, but a tiny, incredibly fast camera combined with a small processor. An optical mouse works by taking thousands of pictures of the surface underneath it every second. It compares these pictures to see how the surface pattern has shifted, and from that, it calculates how far and in what direction you've moved the mouse.
+            </p>
+            <p class="text-gray-700 leading-relaxed mt-4">
+                This simulation demonstrates that process. Below, you'll see two "frames" captured by the mouse's sensor. The first, in grayscale, is <strong>Frame A</strong> (where the mouse was). The second, in red, is <strong>Frame B</strong> (where the mouse is now). The simulation finds the best match for a small part of Frame A (the "template," marked with a blue box) inside Frame B. The resulting movement is shown as a vector.
+            </p>
+        </section>
+
+        <!-- ### INTERACTIVE SIMULATION ### -->
+        <section class="card">
+            <h2 class="card-header text-xl font-semibold text-gray-800">Interactive Demonstration</h2>
+            <div class="card-body">
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="xSlider" class="flex justify-between">
+                            <span>X-Axis (Horizontal)</span>
+                            <span id="xSliderValue" class="font-mono text-blue-600 font-bold">0.000 px</span>
+                        </label>
+                        <input type="range" id="xSlider" min="-2" max="2" value="0" step="0.001" class="w-full">
+                    </div>
+                    <div class="control-group">
+                        <label for="ySlider" class="flex justify-between">
+                            <span>Y-Axis (Vertical)</span>
+                            <span id="ySliderValue" class="font-mono text-blue-600 font-bold">0.000 px</span>
+                        </label>
+                        <input type="range" id="ySlider" min="-2" max="2" value="0" step="0.001" class="w-full">
+                    </div>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <button id="resetButton" class="btn">
+                        Reset Position
+                    </button>
+                </div>
+                
+                <div class="visualization grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Plot 1: Image Overlay -->
+                    <div class="canvas-container">
+                        <h3 class="text-lg font-semibold text-center mb-3">Image Overlay</h3>
+                        <canvas id="canvasOverlay" width="300" height="300" class="mx-auto bg-gray-200 rounded border border-gray-300"></canvas>
+                        <div class="legend">
+                            <span class="legend-item"><span class="legend-color" style="background-color: rgba(100, 100, 100, 0.5);"></span>Frame A (Past)</span>
+                            <span class="legend-item"><span class="legend-color" style="background-color: rgba(239, 68, 68, 0.5);"></span>Frame B (Current)</span>
+                        </div>
+                    </div>
+                    <!-- Plot 2: Vector -->
+                    <div class="canvas-container">
+                        <h3 class="text-lg font-semibold text-center mb-3">Movement Vector</h3>
+                        <canvas id="canvasVector" width="300" height="300" class="mx-auto bg-white rounded border border-gray-200"></canvas>
+                        <div class="text-center font-mono mt-3 text-gray-700">
+                            <p>Speed (Magnified 10x): <span id="speedOutput" class="font-bold text-black">0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="mt-12">
+            <h2 class="text-3xl font-bold mb-4">How Does the Comparison Work?</h2>
+            <p class="mb-6">
+                The mouse doesn't analyze the <strong>entire</strong> image at once. That would be too slow. Instead, it uses a technique called <strong>Template Matching</strong>.
+            </p>
+            <ol class="list-decimal list-inside space-y-3 mb-6 pl-4">
+                <li>The mouse's processor takes a small patch of pixels from the center of <strong>Frame A</strong>. This is the <strong>"template"</strong> (represented by the blue box in the demo).</li>
+                <li>Then, it searches for that <strong>exact</strong> same pattern within <strong>Frame B</strong> (the red image).</li>
+                <li>The position with the <strong>highest similarity score</strong> is where the image has moved to.</li>
+                <li>The difference between the template's original position (the center) and this new, best-match position gives the exact movement: <strong>&Delta;x</strong> and <strong>&Delta;y</strong>. This vector is what's sent to your computer.</li>
+            </ol>
+
+            <!-- Static Visualization -->
+            <div class="flex flex-col md:flex-row items-center justify-around gap-4 my-8 p-4 bg-gray-100 rounded-lg border border-gray-200">
+                <!-- Frame A -->
+                <div class="text-center">
+                    <p class="font-semibold text-lg mb-2">Frame A (Past)</p>
+                    <div class="w-40 h-40 bg-gray-300 rounded-lg relative grid grid-cols-4 gap-1 p-1 shadow-inner">
+                        <!-- "Pixels" -->
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 1; grid-row: 1;"></div>
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 2; grid-row: 1;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 3; grid-row: 1;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 4; grid-row: 1;"></div>
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 1; grid-row: 2;"></div>
+                        <!-- Template Box -->
+                        <div class="col-span-2 row-span-2 bg-gray-600 border-4 border-blue-500 shadow-lg relative flex items-center justify-center" style="grid-column: 2 / span 2; grid-row: 2 / span 2;">
+                            <span class="font-bold text-white text-xs">Template</span>
+                            <div class="absolute w-4 h-4 bg-gray-400 top-1 left-2 rounded-sm"></div>
+                            <div class="absolute w-3 h-3 bg-gray-800 bottom-2 right-1 rounded-sm"></div>
+                        </div>
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 4; grid-row: 2;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 1; grid-row: 3;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 4; grid-row: 3;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 1; grid-row: 4;"></div>
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 2; grid-row: 4;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 3; grid-row: 4;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 4; grid-row: 4;"></div>
+                    </div>
+                </div>
+                
+                <div class="text-gray-400 text-6xl font-bold">&rarr;</div>
+
+                <!-- Frame B -->
+                <div class="text-center">
+                    <p class="font-semibold text-lg mb-2">Frame B (Present)</p>
+                    <div class="w-40 h-40 bg-gray-300 rounded-lg relative grid grid-cols-4 gap-1 p-1 overflow-hidden shadow-inner">
+                        <!-- Pseudo-pixels for background -->
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 1; grid-row: 1;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 2; grid-row: 1;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 3; grid-row: 1;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 4; grid-row: 1;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 1; grid-row: 2;"></div>
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 2; grid-row: 2;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 3; grid-row: 2;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 4; grid-row: 2;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 1; grid-row: 3;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 2; grid-row: 3;"></div>
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 3; grid-row: 3;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 4; grid-row: 3;"></div>
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 1; grid-row: 4;"></div>
+                        <div class="bg-gray-400 rounded-sm w-full h-full" style="grid-column: 2; grid-row: 4;"></div>
+                        <div class="bg-gray-600 rounded-sm w-full h-full" style="grid-column: 3; grid-row: 4;"></div>
+                        <div class="bg-gray-500 rounded-sm w-full h-full" style="grid-column: 4; grid-row: 4;"></div>
+                        
+                        <!-- Found Box (Shifted) -->
+                        <div class="absolute col-span-2 row-span-2 bg-gray-600 border-4 border-green-500 shadow-lg flex items-center justify-center" style="width: calc(50% - 0.125rem); height: calc(50% - 0.125rem); top: 3.25rem; left: 3.25rem;">
+                            <span class="font-bold text-white text-xs">Found!</span>
+                            <div class="absolute w-4 h-4 bg-gray-400 top-1 left-2 rounded-sm"></div>
+                            <div class="absolute w-3 h-3 bg-gray-800 bottom-2 right-1 rounded-sm"></div>
+                        </div>
+                    </div>
+                    <p class="mt-2 font-mono text-sm">
+                        Result: (e.g., +x, +y)
+                    </p>
+                </div>
+            </section>
+
+            <section class="mt-12">
+                <h3 class="text-2xl font-bold mb-4">The "Math" Behind the Match</h3>
+                <p class="mb-6">
+                    To find the "most identical" spot, the sensor chip calculates a "similarity score" for every possible position. The most common method is <strong>Normalized Cross-Correlation (NCC)</strong>. This formula calculates a score from -1 (perfectly opposite) to +1 (perfect match) for each possible offset.
+                </p>
+                <p class="mb-6">
+                    The formula may look complex, but the idea is simple: it finds how well the template ($I$) matches a part of the new image ($J$), shifted by ($u, v$).
+                </p>
+    
+                <div class="math-block text-center text-sm sm:text-lg p-6 bg-gray-100 rounded-lg">
+                    $$ C(u,v) = \frac{\sum_{x,y} [I(x, y) - \bar{I}] [J(x+u, y+v) - \bar{J}]}{\sqrt{\sum_{x,y} [I(x, y) - \bar{I}]^2 \sum_{x,y} [J(x+u, y+v) - \bar{J}]^2}} $$
+                </div>
+                
+                <p class="mt-6 mb-8">Where:</p>
+                <ul class="list-none space-y-4 m-0 p-0">
+                    <li class="flex items-center mb-2">
+                        <span class="katex-inline-block" id="math-I"></span>: is the brightness of the pixel at position (x, y) in the <strong>Template (from Frame A)</strong>.
+                    </li>
+                    <li class="flex items-center mb-2">
+                        <span class="katex-inline-block" id="math-J"></span>: is the brightness of the pixel in <strong>Frame B</strong> that we are comparing against.
+                    </li>
+                    <li class="flex items-center mb-2">
+                        <span class="katex-inline-block" id="math-I-bar"></span>: is the <strong>average brightness</strong> of all pixels in the Template.
+                    </li>
+                    <li class="flex items-center mb-2">
+                        <span class="katex-inline-block" id="math-J-bar"></span>: is the <strong>average brightness</strong> of all pixels in the current window of Frame B.
+                    </li>
+                </ul>
+                <p class="mt-6">
+                    By subtracting the average brightness (a step called "normalizing"), the calculation isn't fooled by simple changes in light. The mouse is looking for the <strong>pattern</strong> of light and dark, not the absolute brightness. The sensor's chip calculates this score for all possible shifts $(u, v)$ in its search area. The $(u, v)$ pair that produces the highest score (closest to 1.0) is the winner. That pair becomes the <strong>&Delta;x</strong> and <strong>&Delta;y</strong> movement vector that is sent to your computer.
+                </p>
+            </section>
+            
+
+            <section class="mt-12">
+                <h2 class="text-3xl font-bold mt-12 mb-4">What Happens When You Move Too Fast?</h2>
+                <p class="mb-6">
+                    This system relies on the new image (Frame B) still containing <strong>most</strong> of the original image (Frame A). If you move the mouse <strong>too fast</strong>, the new image will be completely different from the last one, and the original "template" won't be in Frame B at all.
+                </p>
+                <p class="mb-6">
+                    When this happens, the correlation score will be low for <strong>all</strong> possible offsets. The mouse's processor essentially "loses track" of the surface and can't determine the correct motion. This is why a fast swipe (especially on a low-friction or uniform-color surface) can cause the cursor to jump erratically or not move at all.
+                </p>
+
+                <!-- ### SIMULATION 2: TRACKING LOSS ### -->
+                <div class="card bg-gray-50">
+                    <h2 class="card-header text-xl font-semibold text-gray-800">Simulation: Loss of Tracking</h2>
+                    <div class="card-body">
+                        <p class="text-center text-gray-700 mb-6">
+                            Here, the mouse has moved so far (e.g., <strong>40 pixels right</strong>) that the original blue template from Frame A is no longer visible inside Frame B's search area (red box).
+                        </p>
+        
+                        <div class="visualization grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Frame A -->
+                            <div class="canvas-container">
+                                <h3 class="text-lg font-semibold text-center mb-3">Frame A (Past)</h3>
+                                <canvas id="canvasA_loss" width="300" height="300" class="mx-auto bg-gray-200 rounded border border-gray-300"></canvas>
+                                <div class="legend">
+                                    <span class="legend-item"><span class="w-3 h-3 rounded-full border-2 border-blue-500 mr-2"></span>Template Area</span>
+                                </div>
+                            </div>
+                            <!-- Frame B -->
+                            <div class="canvas-container">
+                                <h3 class="text-lg font-semibold text-center mb-3">Frame B (Present)</h3>
+                                <canvas id="canvasB_loss" width="300" height="300" class="mx-auto bg-gray-200 rounded border border-gray-300"></canvas>
+                                <div class="legend">
+                                    <span class="legend-item"><span class="w-3 h-3 rounded-full border-2 border-red-500 mr-2"></span>Search Area</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tracking-status" class="mt-6 p-4 text-center font-semibold rounded-md bg-red-100 text-red-700 border border-red-200">
+                            <!-- Status message will be inserted here by script -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="text-center py-8 mt-12 bg-gray-800 text-gray-400">
+        <p>A demonstration by Gemini</p>
+    </footer>
+
+    <!-- 
+    This script block contains all the logic for the interactive demo.
+    It does not require any external .js files (other than KaTeX above).
+    -->
+    <script>
+        // Wait for the DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- Simulation Constants ---
+            const SURFACE_SIZE = 200; // Size of our virtual "desk"
+            const SENSOR_SIZE = 100;  // Size of the mouse "sensor" (canvas size)
+            const PIXEL_SCALE = 3;    // How big to draw each "pixel" on the canvas (300 / 100 = 3)
+            const TEMPLATE_SIZE = 40; // Size of the template patch (40x40 pixels)
+            const SPEED_MULTIPLIER = 10; // Factor to magnify speed display
+            const SENSOR_START_X = 50; // Initial X position of sensor on surface
+            const SENSOR_START_Y = 50; // Initial Y position of sensor on surface
+            
+            // --- Element References ---
+            const xSlider = document.getElementById('xSlider');
+            const ySlider = document.getElementById('ySlider');
+            const xSliderValue = document.getElementById('xSliderValue');
+            const ySliderValue = document.getElementById('ySliderValue');
+            const speedOutput = document.getElementById('speedOutput');
+            const resetButton = document.getElementById('resetButton');
+            
+            const canvasOverlay = document.getElementById('canvasOverlay');
+            const ctxOverlay = canvasOverlay.getContext('2d');
+            const canvasVector = document.getElementById('canvasVector');
+            const ctxVector = canvasVector.getContext('2d');
+            
+            const canvasA_loss = document.getElementById('canvasA_loss');
+            const ctxA_loss = canvasA_loss.getContext('2d');
+            const canvasB_loss = document.getElementById('canvasB_loss');
+            const ctxB_loss = canvasB_loss.getContext('2d');
+            const trackingStatus = document.getElementById('tracking-status');
+            
+            // --- Global State ---
+            let deskSurface = [];
+            
+            // --- Generate the "Desk Surface" ---
+            function generateDeskSurface() {
+                // Using a simple pseudo-random generator for consistent results
+                let seed = 0.5;
+                function random() {
+                    let x = Math.sin(seed++) * 10000;
+                    return x - Math.floor(x);
+                }
+                
+                deskSurface = []; // Clear existing surface
+                for (let y = 0; y < SURFACE_SIZE; y++) {
+                    let row = [];
+                    for (let x = 0; x < SURFACE_SIZE; x++) {
+                        row.push(Math.floor(random() * 256));
+                    }
+                    deskSurface.push(row);
+                }
+            }
+            
+            // --- Bilinear Interpolation Function ---
+            // Gets a smooth color value even for fractional coordinates
+            function getBilinearPixel(x_float, y_float) {
+                const x_int = Math.floor(x_float);
+                const y_int = Math.floor(y_float);
+                
+                // Prevent out-of-bounds errors
+                if (x_int < 0 || x_int >= SURFACE_SIZE - 1 || y_int < 0 || y_int >= SURFACE_SIZE - 1) {
+                    return 0; // Return black for out-of-bounds
+                }
+                
+                const x_frac = x_float - x_int;
+                const y_frac = y_float - y_int;
+
+                const x0 = Math.max(0, Math.min(x_int, SURFACE_SIZE - 2));
+                const x1 = x0 + 1;
+                const y0 = Math.max(0, Math.min(y_int, SURFACE_SIZE - 2));
+                const y1 = y0 + 1;
+
+                // Get 4 neighboring pixels
+                const p00 = deskSurface[y0][x0];
+                const p10 = deskSurface[y0][x1];
+                const p01 = deskSurface[y1][x0];
+                const p11 = deskSurface[y1][x1];
+
+                // Perform bilinear interpolation
+                const interp_top = p00 * (1 - x_frac) + p10 * x_frac;
+                const interp_bottom = p01 * (1 - x_frac) + p11 * x_frac;
+                
+                const brightness = interp_top * (1 - y_frac) + interp_bottom * y_frac;
+                
+                return Math.floor(brightness);
+            }
+
+            // --- Draw a "camera frame" onto the canvas ---
+            function drawFrame(ctx, startX_float, startY_float, color) {
+                for (let y = 0; y < SENSOR_SIZE; y++) {
+                    for (let x = 0; x < SENSOR_SIZE; x++) {
+                        
+                        const deskX_float = startX_float + x;
+                        const deskY_float = startY_float + y;
+                        
+                        const brightness = getBilinearPixel(deskX_float, deskY_float);
+                        let r, g, b;
+
+                        if (color === 'gray') {
+                            r = g = b = brightness;
+                        } else if (color === 'red') {
+                            // Red-tinted for Frame B
+                            r = brightness;
+                            g = b = Math.floor(brightness * 0.5);
+                        }
+                        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                        ctx.fillRect(x * PIXEL_SCALE, y * PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE);
+                    }
+                }
+            }
+            
+            // --- Main Drawing Functions ---
+
+            function drawOverlay(move_x, move_y) {
+                ctxOverlay.clearRect(0, 0, overlaySize, overlaySize);
+
+                // Draw Frame A (Gray) - The "past"
+                ctxOverlay.globalAlpha = 0.6;
+                drawFrame(ctxOverlay, SENSOR_START_X, SENSOR_START_Y, 'gray');
+                
+                // Draw Frame B (Red) - The "present", offset by move_x and move_y
+                ctxOverlay.globalAlpha = 0.6;
+                drawFrame(ctxOverlay, SENSOR_START_X + move_x, SENSOR_START_Y + move_y, 'red');
+                
+                // Reset alpha
+                ctxOverlay.globalAlpha = 1.0;
+
+                // Draw the blue "template" box on top of Frame A's original position
+                const templateX = (SENSOR_SIZE - TEMPLATE_SIZE) / 2;
+                const templateY = (SENSOR_SIZE - TEMPLATE_SIZE) / 2;
+                ctxOverlay.strokeStyle = '#3b82f6'; // blue-500
+                ctxOverlay.lineWidth = 2;
+                ctxOverlay.setLineDash([5, 3]); // Dashed line
+                ctxOverlay.strokeRect(
+                    templateX * PIXEL_SCALE, 
+                    templateY * PIXEL_SCALE, 
+                    TEMPLATE_SIZE * PIXEL_SCALE, 
+                    TEMPLATE_SIZE * PIXEL_SCALE
+                );
+                ctxOverlay.setLineDash([]); // Reset line dash
+            }
+
+            function drawVector(move_x, move_y, speed) {
+                ctxVector.clearRect(0, 0, vectorSize, vectorSize);
+
+                const centerX = vectorSize / 2;
+                const centerY = vectorSize / 2;
+                
+                // --- Draw Grid and Axes ---
+                ctxVector.strokeStyle = '#e5e7eb'; // gray-200
+                ctxVector.lineWidth = 1;
+                // Vertical lines
+                for (let x = 0; x <= vectorSize; x += 20) {
+                    ctxVector.beginPath();
+                    ctxVector.moveTo(x, 0);
+                    ctxVector.lineTo(x, vectorSize);
+                    ctxVector.stroke();
+                }
+                // Horizontal lines
+                for (let y = 0; y <= vectorSize; y += 20) {
+                    ctxVector.beginPath();
+                    ctxVector.moveTo(0, y);
+                    ctxVector.lineTo(vectorSize, y);
+                    ctxVector.stroke();
+                }
+
+                // Main Axes
+                ctxVector.strokeStyle = '#9ca3af'; // gray-400
+                ctxVector.lineWidth = 2;
+                ctxVector.beginPath();
+                ctxVector.moveTo(0, centerY);
+                ctxVector.lineTo(vectorSize, centerY);
+                ctxVector.stroke();
+                ctxVector.beginPath();
+                ctxVector.moveTo(centerX, 0);
+                ctxVector.lineTo(centerX, vectorSize);
+                ctxVector.stroke();
+
+                // --- Draw the Vector Arrow ---
+                const scale = 30; // 3 base * 10x magnification
+                
+                // We flip move_y because canvas Y-axis is inverted (0 is at top)
+                const endX = centerX + move_x * scale;
+                const endY = centerY - move_y * scale; 
+
+                if (speed > 0) {
+                    ctxVector.strokeStyle = '#ef4444'; // red-500
+                    ctxVector.fillStyle = '#ef4444';
+                    ctxVector.lineWidth = 4; // Fixed width
+                    
+                    const headlen = 10;
+                    const angle = Math.atan2(endY - centerY, endX - centerX);
+                    
+                    // Draw line
+                    ctxVector.beginPath();
+                    ctxVector.moveTo(centerX, centerY);
+                    ctxVector.lineTo(endX, endY);
+                    ctxVector.stroke();
+
+                    // Draw arrowhead
+                    ctxVector.beginPath();
+                    ctxVector.moveTo(endX, endY);
+                    ctxVector.lineTo(
+                        endX - headlen * Math.cos(angle - Math.PI / 6),
+                        endY - headlen * Math.sin(angle - Math.PI / 6)
+                    );
+                    ctxVector.lineTo(
+                        endX - headlen * Math.cos(angle + Math.PI / 6),
+                        endY - headlen * Math.sin(angle + Math.PI / 6)
+                    );
+                    ctxVector.lineTo(endX, endY);
+                    ctxVector.fill();
+
+                } else {
+                    // Draw a dot at the origin if no movement
+                    ctxVector.fillStyle = '#ef4444';
+                    ctxVector.beginPath();
+                    ctxVector.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+                    ctxVector.fill();
+                }
+            }
+
+            // --- Tracking Loss Simulation ---
+            function drawLossSimulation() {
+                const searchAreaSize = 70; // Size of the area in Frame B to search
+                const templateX = (SENSOR_SIZE - TEMPLATE_SIZE) / 2;
+                const templateY = (SENSOR_SIZE - TEMPLATE_SIZE) / 2;
+                const searchAreaX = (SENSOR_SIZE - searchAreaSize) / 2;
+                const searchAreaY = (SENSOR_SIZE - searchAreaSize) / 2;
+                
+                // --- Draw Frame A ---
+                ctxA_loss.clearRect(0, 0, 300, 300);
+                drawFrame(ctxA_loss, SENSOR_START_X, SENSOR_START_Y, 'gray');
+                // Draw template box
+                ctxA_loss.strokeStyle = '#3b82f6'; // blue-500
+                ctxA_loss.lineWidth = 2;
+                ctxA_loss.setLineDash([5, 3]);
+                ctxA_loss.strokeRect(
+                    templateX * PIXEL_SCALE, 
+                    templateY * PIXEL_SCALE, 
+                    TEMPLATE_SIZE * PIXEL_SCALE, 
+                    TEMPLATE_SIZE * PIXEL_SCALE
+                );
+                ctxA_loss.setLineDash([]);
+                ctxA_loss.fillStyle = 'black';
+                ctxA_loss.font = 'bold 14px sans-serif';
+                ctxA_loss.textAlign = 'center';
+                ctxA_loss.fillText('Template', 150, 150 + 8);
+
+
+                // --- Draw Frame B (with large shift) ---
+                const bigShiftX = 40; // This is larger than the search area radius
+                const bigShiftY = -30;
+                ctxB_loss.clearRect(0, 0, 300, 300);
+                // Corrected typo: SENSOR_START_X instead of SDENSOR_START_X
+                drawFrame(ctxB_loss, SENSOR_START_X + bigShiftX, SENSOR_START_Y + bigShiftY, 'gray'); 
+                
+                // Draw search area
+                ctxB_loss.strokeStyle = '#ef4444'; // red-500
+                ctxB_loss.lineWidth = 2;
+                ctxB_loss.setLineDash([5, 3]);
+                ctxB_loss.strokeRect(
+                    searchAreaX * PIXEL_SCALE, 
+                    searchAreaY * PIXEL_SCALE, 
+                    searchAreaSize * PIXEL_SCALE, 
+                    searchAreaSize * PIXEL_SCALE
+                );
+                ctxB_loss.setLineDash([]);
+                ctxB_loss.fillStyle = '#ef4444';
+                ctxB_loss.font = 'bold 14px sans-serif';
+                ctxB_loss.textAlign = 'center';
+                ctxB_loss.fillText('Search Area', 150, (searchAreaY - 5) * PIXEL_SCALE);
+
+                // Show tracking status
+                trackingStatus.innerHTML = `
+                    <p class="text-red-600 font-bold">TRACKING FAILED</p>
+                    <p class="text-sm text-gray-700">The blue <strong>Template</strong> from Frame A has moved completely outside of Frame B's <strong>Search Area</strong> (red box). The sensor can't find a match and reports no movement (or erratic movement).</p>
+                `;
+            }
+            
+            // --- Main Update Function ---
+            function updateSimulation() {
+                // Get values from sliders
+                const move_x = parseFloat(xSlider.value);
+                const move_y = parseFloat(ySlider.value); 
+                
+                // Calculate speed (magnitude)
+                const raw_speed = Math.sqrt(move_x**2 + move_y**2);
+                const magnified_speed = raw_speed * SPEED_MULTIPLIER; // Apply 10x factor
+
+                // Update text labels
+                xSliderValue.textContent = `${move_x.toFixed(3)} px`;
+                ySliderValue.textContent = `${move_y.toFixed(3)} px`; 
+                speedOutput.textContent = magnified_speed.toFixed(2); // Display magnified speed
+
+                // Redraw canvases
+                // Pass the non-inverted y-move to drawFrame, as it expects (x, y) coordinates
+                // Note: The vector plot y-axis is inverted for standard Cartesian coordinates
+                drawOverlay(move_x, move_y);
+                drawVector(move_x, move_y, raw_speed); // Pass raw_speed for the > 0 check
+            }
+
+            // --- Reset Function ---
+            function resetSimulation() {
+                xSlider.value = 0;
+                ySlider.value = 0;
+                updateSimulation();
+            }
+            
+            // --- 4. Render KaTeX Math Elements ---
+            // This function finds the elements by ID and renders the LaTeX code inside them
+            function renderMath() {
+                try {
+                    if (window.katex) {
+                        katex.render("C(u,v) = \\frac{\\sum_{x,y} [I(x, y) - \\bar{I}] [J(x+u, y+v) - \\bar{J}]}{\\sqrt{\\sum_{x,y} [I(x, y) - \\bar{I}]^2 \\sum_{x,y} [J(x+u, y+v) - \\bar{J}]^2}}", 
+                            document.getElementById('katex-formula-main'), {
+                            displayMode: true,
+                            throwOnError: false
+                        });
+                        
+                        katex.render("I(x, y)", document.getElementById('math-I'), { throwOnError: false });
+                        katex.render("J(x+u, y+v)", document.getElementById('math-J'), { throwOnError: false });
+                        katex.render("\\bar{I}", document.getElementById('math-I-bar'), { throwOnError: false });
+                        katex.render("\\bar{J}", document.getElementById('math-J-bar'), { throwOnError: false });
+                    }
+                } catch (e) {
+                    console.error("KaTeX rendering failed: ", e);
+                }
+            }
+
+            // --- 5. Initialization ---
+            generateDeskSurface();
+            
+            // Add event listeners
+            xSlider.addEventListener('input', updateSimulation);
+            ySlider.addEventListener('input', updateSimulation);
+            resetButton.addEventListener('click', resetSimulation);
+            
+            // Run initial simulation
+            updateSimulation();
+            
+            // Draw the second visualization
+            drawLossSimulation();
+
+            // Render all KaTeX elements on the page
+            renderMath();
+        });
+    </script>
+</body>
+</html>
